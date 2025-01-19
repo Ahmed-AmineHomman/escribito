@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "escribito"
+version = "0.1.0"
+description = "A lightweight Gradio app leveraging IA to help you create wonderful dialogues for your novels or theater scenes."
+authors = [
+    { name = "Ahmed-Amine HOMMAN", email = "ahmed-amine.homman@outlook.fr" }
+]
+license = { text = "MIT" }
+
+[project.dependencies]
+gradio = "*"
+transformers = "*"
+torch = "*"
+huggingface_hub = "*"
