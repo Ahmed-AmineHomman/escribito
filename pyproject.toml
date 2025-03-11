@@ -13,6 +13,4 @@ license = { text = "MIT" }
 
 [project.dependencies]
 gradio = "*"
-transformers = "*"
-torch = "*"
-huggingface_hub = "*"
+cohere = "*"
