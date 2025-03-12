@@ -1,6 +1,6 @@
 # Escribito
 
-![](config/escribito.png)
+![](config/escribito.svg)
 
 **Open Source under the MIT License**
 
