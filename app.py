@@ -7,7 +7,7 @@ from os import getenv
 import gradio as gr
 from cohere import ClientV2
 
-from app_api import next_message, reset_conversation, CHARACTERS
+from app_api import next, download, CHARACTERS
 
 
 def load_parameters() -> Namespace:
@@ -30,12 +30,20 @@ def load_parameters() -> Namespace:
         action="store_true",
         help="Whether to share the application.",
     )
+    parser.add_argument(
+        "--temp-dir",
+        type=str,
+        required=False,
+        default="temp",
+        help="The temporary directory where the conversation will be stored.",
+    )
     return parser.parse_args()
 
 
 def build_ui(
         config: dict,
         client: ClientV2,
+        temp_dir: str,
 ):
     """
     Builds the UI.
@@ -62,12 +70,12 @@ def build_ui(
                         value=CHARACTERS.get("user"),
                         choices=list(CHARACTERS.values()),
                         multiselect=False,
-                        label="Character",
+                        label=config.get("user_panel").get("role_selector_label"),
                         scale=1,
                         container=True
                     )
                     text_input = gr.Textbox(
-                        label="Message",
+                        label=config.get("user_panel").get("message_label"),
                         placeholder="Type your message here",
                         container=True,
                         scale=3,
@@ -77,8 +85,8 @@ def build_ui(
                             value=config.get("user_panel").get("send_btn_label"),
                             variant="primary"
                         )
-                        reset_btn = gr.Button(
-                            value=config.get("user_panel").get("reset_btn_label"),
+                        download_btn = gr.DownloadButton(
+                            label=config.get("user_panel").get("download_btn_label"),
                             variant="secondary"
                         )
 
@@ -89,16 +97,22 @@ def build_ui(
                     f"## {config.get('character_panel').get('title')}\n\n{config.get('character_panel').get('description')}")
                 with gr.Column(scale=1, variant="panel"):
                     with gr.Tab(label="Character A"):
-                        name_a = gr.Text(label="name", value=config.get("character_panel").get("character_a_name"))
+                        name_a = gr.Text(
+                            label=config.get("character_panel").get("character_a_name_label"),
+                            value=config.get("character_panel").get("character_a_name")
+                        )
                         story_a = gr.Textbox(
-                            label="story",
+                            label=config.get("character_panel").get("character_a_story_label"),
                             value=config.get("character_panel").get("character_a_story"),
                             lines=3,
                         )
                     with gr.Tab(label="Character B"):
-                        name_b = gr.Text(label="name", value=config.get("character_panel").get("character_b_name"))
+                        name_b = gr.Text(
+                            label=config.get("character_panel").get("character_b_name_label"),
+                            value=config.get("character_panel").get("character_b_name")
+                        )
                         story_b = gr.Text(
-                            label="story",
+                            label=config.get("character_panel").get("character_b_story_label"),
                             value=config.get("character_panel").get("character_b_story"),
                             lines=3,
                         )
@@ -116,20 +130,24 @@ def build_ui(
                         step=0.05,
                     )
 
+        # States
+        temp_dir = gr.State(value=temp_dir)
+
         # When the button is clicked, call next_message and update both the conversation display and state.
         send_btn.click(
-            fn=partial(next_message, client=client),
+            fn=partial(next, client=client),
             inputs=[conversation, role_selector, text_input, name_a, story_a, name_b, story_b, temperature],
             outputs=[conversation, role_selector, text_input],
         )
         text_input.submit(
-            fn=partial(next_message, client=client),
+            fn=partial(next, client=client),
             inputs=[conversation, role_selector, text_input, name_a, story_a, name_b, story_b, temperature],
             outputs=[conversation, role_selector, text_input],
         )
-        reset_btn.click(
-            fn=reset_conversation,
-            outputs=[conversation]
+        download_btn.click(
+            fn=download,
+            inputs=[conversation, temp_dir, name_a, name_b],
+            outputs=[download_btn]
         )
     return demo
 
@@ -144,11 +162,15 @@ if __name__ == "__main__":
     with open(os.path.join("config", "languages", f"{params.language}.toml"), "rb") as fp:
         config = tomllib.load(fp)
 
+    # set up for temp directory
+    os.makedirs(params.temp_dir, exist_ok=True)
+
     # run the app
     (
         build_ui(
             config=config,
             client=client,
+            temp_dir=params.temp_dir,
         )
         .launch(
             share=params.share,

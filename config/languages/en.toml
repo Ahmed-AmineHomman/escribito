@@ -28,8 +28,10 @@ Refer to the corresponding panels for more information about what they can do.
 
 # user control panel
 [user_panel]
+role_selector_label = "Character"
+message_label = "Message"
 send_btn_label = "Send"
-reset_btn_label = "Reset Conversation"
+download_btn_label = "Download"
 
 # character definition panel
 [character_panel]
@@ -39,6 +41,10 @@ Set the name & backstory of your characters.
 Make sure to include their motivations & objectives for interseting conversations.
 Also ensure that enough context is provided about how they came to talk to each other.
 """
+character_a_name_label = "Name"
+character_a_story_label = "Story"
+character_b_name_label = "Name"
+character_b_story_label = "Story"
 character_a_name = "John"
 character_a_story = "A middle-aged man, father of two and quite happy with his life. He is a friend of Stella and has come to visit her for a coffee."
 character_b_name = "Stella"

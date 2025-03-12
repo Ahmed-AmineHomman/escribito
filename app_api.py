@@ -1,3 +1,6 @@
+import json
+import os
+
 from cohere import ClientV2
 
 CHARACTERS = {
@@ -7,14 +10,7 @@ CHARACTERS = {
 ROLES = {v: k for k, v in CHARACTERS.items()}
 
 
-def reset_conversation() -> list:
-    """
-    Resets the conversation.
-    """
-    return []
-
-
-def pursue_conversation(
+def generate(
         conversation: list[dict],
         client: ClientV2,
         system_prompt: str,
@@ -66,7 +62,38 @@ def pursue_conversation(
     return response
 
 
-def next_message(
+def download(
+        conversation: list[dict],
+        temp_dir: str,
+        name_a: str,
+        name_b: str,
+) -> str:
+    """
+    Allows the download of the conversation as a JSON file.
+
+    Parameters
+    ----------
+    conversation: list of dict
+        The conversation to download.
+    temp_dir: str
+        The server's temporary directory where the conversation will be stored.
+    name_a: str
+        Name of character A (i.e. "user" character).
+    name_b: str
+        Name of character B (i.e. "assistant" character).
+    """
+    names = {k: v for k, v in zip(["user", "assistant"], [name_a, name_b])}
+    filename = os.path.join(temp_dir, "conversation.json")
+    data = [
+        {"character": names.get(data.get("role")), "message": data.get("content")}
+        for data in conversation
+    ]
+    with open(filename, "w") as f:
+        json.dump(data, f)
+    return filename
+
+
+def next(
         conversation: list[dict],
         user_character: str,
         user_message: str,
@@ -156,14 +183,14 @@ Take care in only replying as your character and to never break the fourth curta
             system_prompt = _template.format(name=name_b, story=story_b)
 
         if not conversation:  # if conversation is empty -> generate the first turn from empty user message
-            response = pursue_conversation(
+            response = generate(
                 client=client,
                 conversation=[{"role": "user", "content": " "}],
                 system_prompt=system_prompt
             )
             conversation = [{"role": ROLES.get(next_character), "content": response}]
         else:  # if conversation exists -> provide it as-is
-            response = pursue_conversation(client=client, conversation=conversation, system_prompt=system_prompt)
+            response = generate(client=client, conversation=conversation, system_prompt=system_prompt)
             conversation.append({"role": ROLES.get(next_character), "content": response})
 
     # switch the next role & reset user message
