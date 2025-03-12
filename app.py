@@ -31,6 +31,13 @@ def load_parameters() -> Namespace:
         help="Whether to share the application.",
     )
     parser.add_argument(
+        "--port",
+        type=int,
+        required=False,
+        default=7860,
+        help="The port where the app will listen to (only used if --share is provided).",
+    )
+    parser.add_argument(
         "--temp-dir",
         type=str,
         required=False,
@@ -62,6 +69,8 @@ def build_ui(
                     editable="all",
                     avatar_images=("config/avatars/character_a.png", "config/avatars/character_b.png"),
                     height=600,
+                    show_copy_button=True,
+                    show_copy_all_button=True,
                 )
 
                 # Inputs
@@ -181,5 +190,6 @@ if __name__ == "__main__":
         )
         .launch(
             share=params.share,
+            port=params.port,
         )
     )
