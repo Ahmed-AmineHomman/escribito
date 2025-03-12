@@ -6,24 +6,17 @@
 #
 # Example:
 #       `python app.py --language=fr`
-# The above command will tell the app to search for a `fr.toml` file in this folder and use its content to display the in-app text.
-# It does not find the file, it will revert back automatically to this file.
+# If the specified file is not found, the app reverts to this file.
 # ----------------------------------------------------------------------------------------------------------------------
 
-# The title of the app
 description = """
-Welcome to Escribito, your assistant writer for dialogues!
+Welcome to Escribito—your companion for crafting and exploring AI-generated dialogues!
 
-The left panel offers a user control panel (below) if you want to insert some messages into the conversation.
-The "Send" button (or pressing enter while focused on the text box) starts the generation of the next turn of the conversation.
+- Use the left panel to insert new messages or let the model generate responses. Click “Send” (or press Enter) to continue.
+- When the “Message” field is empty, Escribito uses the LLM to produce the next reply. Otherwise, it appends your typed text to the conversation, depending on which character you’ve selected.
+- The right panel lets you fine-tune the LLM’s parameters and customize the characters’ names and backstories. Refer to each panel's guidance for more details.
 
--   If the "message" text box is empty, the LLM will generate the next turn of the conversation, i.e. the other character's response.
--   Otherwise, the text it contains will be inserted in the conversation, according to the value of the "character" dropdown.
-    If this dropdown corresponds to the character that spoke last, the message will be appended to this character's last message.
-
-The right panel offers you control over the generation, by allowing you to tweak the LLM generation parameters.
-It also, and most importantly, allows you to customize the character interacting in the conversation by defining their name and backstory.
-Refer to the corresponding panels for more information about what they can do.
+Have fun creating dynamic, character-driven exchanges!
 """
 
 # user control panel
@@ -37,26 +30,23 @@ download_btn_label = "Download"
 [character_panel]
 title = "Character Definition"
 description = """
-Set the name & backstory of your characters.
-Make sure to include their motivations & objectives for interseting conversations.
-Also ensure that enough context is provided about how they came to talk to each other.
+Define each character’s name and story. Include motivations, objectives, and relevant context to keep conversations engaging and coherent. Provide enough background on why your characters are interacting.
 """
 character_a_name_label = "Name"
 character_a_story_label = "Story"
 character_b_name_label = "Name"
 character_b_story_label = "Story"
 character_a_name = "John"
-character_a_story = "A middle-aged man, father of two and quite happy with his life. He is a friend of Stella and has come to visit her for a coffee."
+character_a_story = "A middle-aged father of two, happily enjoying life. He’s an old friend of Stella and has dropped by for a coffee."
 character_b_name = "Stella"
-character_b_story = "A middle-aged woman, single. She has invited her friend John for a coffee because she wants his help over a matter that troubles her."
+character_b_story = "A middle-aged woman, single, who invited her friend John for coffee to seek his advice on a pressing concern."
 
 [llm_panel]
 title = "LLM Control"
 description = """
-Control the LLM inference parameters.
-Experiment with the parameters below or simply use the optimized default values.
+Adjust the parameters that guide your AI’s responses. Experiment with different settings or rely on the recommended defaults.
 """
 temperature_btn_label = "Temperature"
-temperature_btn_info = "The temperature controls the creativity of the LLM: the higher the more creative it is."
+temperature_btn_info = "Controls how creative or bold the AI’s responses are. Higher values produce more unexpected replies."
 model_btn_label = "Model"
-model_btn_info = "The LLM behind the generation: the heavier the better but the more expensive."
+model_btn_info = "Select which AI model to use. Larger models may yield better results but can be slower or more expensive."
