@@ -43,54 +43,88 @@ def build_ui(
     with gr.Blocks() as demo:
         gr.Markdown(f"# Escribito\n\n{config.get('description', '')}")
 
-        with gr.Row():
+        with gr.Row(equal_height=True):
             # Left panel: conversation & inputs
-            with gr.Column(scale=3):
-                # Markdown component to display the conversation.
+            with gr.Column(scale=5):
+                # The dialogue displayed as a chatbot
                 conversation = gr.Chatbot(
                     label="Story",
                     type="messages",
                     container=True,
                     editable="all",
+                    avatar_images=("config/avatars/character_a.png", "config/avatars/character_b.png"),
+                    height=600,
                 )
 
                 # Inputs
-                with gr.Row():
+                with gr.Row(equal_height=True):
                     role_selector = gr.Dropdown(
                         value=CHARACTERS.get("user"),
                         choices=list(CHARACTERS.values()),
                         multiselect=False,
                         label="Character",
                         scale=1,
+                        container=True
                     )
                     text_input = gr.Textbox(
                         label="Message",
                         placeholder="Type your message here",
-                        lines=1,
+                        container=True,
                         scale=3,
                     )
                     with gr.Column():
-                        send_btn = gr.Button(value=config.get("send_btn_label"), variant="primary")
-                        reset_btn = gr.Button(value=config.get("reset_btn_label"), variant="secondary")
+                        send_btn = gr.Button(
+                            value=config.get("user_panel").get("send_btn_label"),
+                            variant="primary"
+                        )
+                        reset_btn = gr.Button(
+                            value=config.get("user_panel").get("reset_btn_label"),
+                            variant="secondary"
+                        )
 
-            # Right panel: Character Definition
-            with gr.Column(scale=1, variant="panel"):
-                with gr.Tab(label="Character A"):
-                    name_a = gr.Text(label="name", value="A")
-                    story_a = gr.Text(label="story", value="A middle aged man happy with his life.")
-                with gr.Tab(label="Character B"):
-                    name_b = gr.Text(label="name", value="B")
-                    story_b = gr.Text(label="story", value="A middle aged woman happy with her life.")
+            # Right Panel: controls
+            with gr.Column(scale=3):
+                # Character Definition Panel
+                gr.Markdown(
+                    f"## {config.get('character_panel').get('title')}\n\n{config.get('character_panel').get('description')}")
+                with gr.Column(scale=1, variant="panel"):
+                    with gr.Tab(label="Character A"):
+                        name_a = gr.Text(label="name", value=config.get("character_panel").get("character_a_name"))
+                        story_a = gr.Textbox(
+                            label="story",
+                            value=config.get("character_panel").get("character_a_story"),
+                            lines=3,
+                        )
+                    with gr.Tab(label="Character B"):
+                        name_b = gr.Text(label="name", value=config.get("character_panel").get("character_b_name"))
+                        story_b = gr.Text(
+                            label="story",
+                            value=config.get("character_panel").get("character_b_story"),
+                            lines=3,
+                        )
+
+                # LLM Control Panel
+                gr.Markdown(
+                    f"## {config.get('llm_panel').get('title')}\n\n{config.get('llm_panel').get('description')}")
+                with gr.Column(scale=1, variant="panel"):
+                    temperature = gr.Slider(
+                        label=config.get("llm_panel").get("temperature_btn_label"),
+                        info=config.get("llm_panel").get("temperature_btn_info"),
+                        value=0.8,
+                        minimum=0.0,
+                        maximum=2.0,
+                        step=0.05,
+                    )
 
         # When the button is clicked, call next_message and update both the conversation display and state.
         send_btn.click(
             fn=partial(next_message, client=client),
-            inputs=[conversation, role_selector, text_input, name_a, story_a, name_b, story_b],
+            inputs=[conversation, role_selector, text_input, name_a, story_a, name_b, story_b, temperature],
             outputs=[conversation, role_selector, text_input],
         )
         text_input.submit(
             fn=partial(next_message, client=client),
-            inputs=[conversation, role_selector, text_input, name_a, story_a, name_b, story_b],
+            inputs=[conversation, role_selector, text_input, name_a, story_a, name_b, story_b, temperature],
             outputs=[conversation, role_selector, text_input],
         )
         reset_btn.click(

@@ -18,6 +18,7 @@ def pursue_conversation(
         conversation: list[dict],
         client: ClientV2,
         system_prompt: str,
+        temperature: float = 0.8,
 ) -> str:
     """
     Generates the next turn of the provided conversation.
@@ -33,6 +34,8 @@ def pursue_conversation(
         The Cohere API client.
     system_prompt: str
         The system instructions given to the LLM generating the next message.
+    temperature: float
+        The temperature of the LLM generating the next message.
 
     Returns
     -------
@@ -54,7 +57,7 @@ def pursue_conversation(
 
     # call the API
     response = (
-        client.chat(model="command-r", messages=messages)
+        client.chat(model="command-r", messages=messages, temperature=temperature)
         .message
         .content[0]
         .text
@@ -71,6 +74,7 @@ def next_message(
         story_a: str,
         name_b: str,
         story_b: str,
+        temperature: float,
         client: ClientV2,
 ) -> tuple[list, str, str]:
     """
@@ -97,6 +101,8 @@ def next_message(
         Name of character B.
     story_b : str
         Story of character B.
+    temperature: float
+        Temperature of the LLM generating the next message.
     client: cohere.ClientV2
         The Cohere API client.
 

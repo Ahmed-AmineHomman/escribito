@@ -12,15 +12,43 @@
 
 # The title of the app
 description = """
-Welcome to Escribito!
+Welcome to Escribito, your assistant writer for dialogues!
 
-This app allows to generate dialogues between two characters controlled by a Large Language Model (LLM).
-You can define on the right panel the name & back story of each character, and then click on the "Next" button to generate a single turn of conversation.
-You can also click on the "Reset" button to start a new conversation from scratch.
-If you want to control a given turn of conversation, you can choose the character and its message below and click "Next".
-The app will then add your message to the conversation.
+The left panel offers a user control panel (below) if you want to insert some messages into the conversation.
+The "Send" button (or pressing enter while focused on the text box) starts the generation of the next turn of the conversation.
+
+-   If the "message" text box is empty, the LLM will generate the next turn of the conversation, i.e. the other character's response.
+-   Otherwise, the text it contains will be inserted in the conversation, according to the value of the "character" dropdown.
+    If this dropdown corresponds to the character that spoke last, the message will be appended to this character's last message.
+
+The right panel offers you control over the generation, by allowing you to tweak the LLM generation parameters.
+It also, and most importantly, allows you to customize the character interacting in the conversation by defining their name and backstory.
+Refer to the corresponding panels for more information about what they can do.
 """
 
-# App button labels
+# user control panel
+[user_panel]
 send_btn_label = "Send"
 reset_btn_label = "Reset Conversation"
+
+# character definition panel
+[character_panel]
+title = "Character Definition"
+description = """
+Set the name & backstory of your characters.
+Make sure to include their motivations & objectives for interseting conversations.
+Also ensure that enough context is provided about how they came to talk to each other.
+"""
+character_a_name = "John"
+character_a_story = "A middle-aged man, father of two and quite happy with his life. He is a friend of Stella and has come to visit her for a coffee."
+character_b_name = "Stella"
+character_b_story = "A middle-aged woman, single. She has invited her friend John for a coffee because she wants his help over a matter that troubles her."
+
+[llm_panel]
+title = "LLM Control"
+description = """
+Control the LLM inference parameters.
+Experiment with the parameters below or simply use the optimized default values.
+"""
+temperature_btn_label = "Temperature"
+temperature_btn_info = "The temperature controls the creativity of the LLM: the higher the more creative it is. It is recommended to use a value close to 1 in the case of dialogue generation."
