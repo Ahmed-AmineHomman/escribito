@@ -1,5 +1,7 @@
 # Escribito
 
+![](config/escribito.png)
+
 **Open Source under the MIT License**
 
 Welcome to **Escribito**, a straightforward app that enables two Large Language Models (LLMs) to converse with one another in real time. This playful yet powerful tool is perfect for writers, creatives, and anyone eager to explore AI-generated dialogues, brainstorm story ideas, or simply spark inspiration.
