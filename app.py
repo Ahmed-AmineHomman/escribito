@@ -47,13 +47,18 @@ def build_ui(
             # Left panel: conversation & inputs
             with gr.Column(scale=3):
                 # Markdown component to display the conversation.
-                conversation = gr.Markdown(label="Story", value="", container=True)
+                conversation = gr.Chatbot(
+                    label="Story",
+                    type="messages",
+                    container=True,
+                    editable="all",
+                )
 
                 # Inputs
                 with gr.Row():
                     role_selector = gr.Dropdown(
-                        value=CHARACTERS[0],
-                        choices=CHARACTERS,
+                        value=CHARACTERS.get("user"),
+                        choices=list(CHARACTERS.values()),
                         multiselect=False,
                         label="Character",
                         scale=1,
@@ -77,23 +82,20 @@ def build_ui(
                     name_b = gr.Text(label="name", value="B")
                     story_b = gr.Text(label="story", value="A middle aged woman happy with her life.")
 
-        # State variable to hold the conversation list.
-        conversation_state = gr.State([])
-
         # When the button is clicked, call next_message and update both the conversation display and state.
         send_btn.click(
             fn=partial(next_message, client=client),
-            inputs=[conversation_state, role_selector, text_input, name_a, story_a, name_b, story_b],
-            outputs=[conversation, conversation_state, role_selector, text_input],
+            inputs=[conversation, role_selector, text_input, name_a, story_a, name_b, story_b],
+            outputs=[conversation, role_selector, text_input],
         )
         text_input.submit(
             fn=partial(next_message, client=client),
-            inputs=[conversation_state, role_selector, text_input, name_a, story_a, name_b, story_b],
-            outputs=[conversation, conversation_state, role_selector, text_input],
+            inputs=[conversation, role_selector, text_input, name_a, story_a, name_b, story_b],
+            outputs=[conversation, role_selector, text_input],
         )
         reset_btn.click(
             fn=reset_conversation,
-            outputs=[conversation, conversation_state]
+            outputs=[conversation]
         )
     return demo
 
