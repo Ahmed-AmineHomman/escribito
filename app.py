@@ -5,6 +5,7 @@ from functools import partial
 from os import getenv
 
 import gradio as gr
+from PIL.ImageOps import scale
 from cohere import ClientV2
 
 from app_api import next_message, download_conversation, CHARACTERS, MODELS
@@ -69,7 +70,23 @@ def build_ui(
     Builds the UI.
     """
     with gr.Blocks() as demo:
-        gr.Markdown(f"# Escribito\n\n{config.get('description', '')}")
+        gr.Markdown(f"# Escribito", elem_classes=["header"])
+        with gr.Row(equal_height=True):
+            with gr.Column(scale=1):
+                gr.Image(
+                    value="config/escribito.svg",
+                    height=200,
+                    width=200,
+                    interactive=False,
+                    show_label=False,
+                    show_download_button=False,
+                    show_share_button=False,
+                    show_fullscreen_button=False,
+                    container=False,
+                    scale=1,
+                )
+            with gr.Column(scale=3):
+                gr.Markdown(config.get('description', ''))
 
         with gr.Row(equal_height=True):
             # Left panel: conversation & inputs
