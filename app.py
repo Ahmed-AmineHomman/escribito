@@ -38,6 +38,13 @@ def load_parameters() -> Namespace:
         help="The port where the app will listen to (only used if --share is provided).",
     )
     parser.add_argument(
+        "--server-name",
+        type=str,
+        required=False,
+        default="localhost",
+        help="The server name where the app will listen to (only used if --share is provided).",
+    )
+    parser.add_argument(
         "--temp-dir",
         type=str,
         required=False,
@@ -197,6 +204,7 @@ if __name__ == "__main__":
         )
         .launch(
             share=params.share,
-            port=params.port,
+            server_name=params.server_name,
+            server_port=params.port,
         )
     )

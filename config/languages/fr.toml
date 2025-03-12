@@ -1,0 +1,63 @@
+# ----------------------------------------------------------------------------------------------------------------------
+# Ceci est le fichier de configuration pour la langue française.
+# Il définit tous les textes affichés dans l’application dans les variables correspondantes.
+# Pour créer un fichier de configuration dans une autre langue, copiez simplement ce fichier et traduisez
+# toutes ses variables dans la langue souhaitée.
+# Vous pourrez ensuite lancer l’application avec le paramètre `--language` et indiquer le nom du fichier de configuration
+# à utiliser.
+#
+# Exemple :
+#       `python app.py --language=fr`
+# Si le fichier spécifié n’est pas trouvé, l’application reviendra automatiquement à la version anglaise.
+# ----------------------------------------------------------------------------------------------------------------------
+
+# Le titre de l'application
+description = """
+Bienvenue dans Escribito, votre assistant d'écriture de dialogues !
+
+Le panneau de gauche vous propose un panneau de contrôle utilisateur (ci-dessous) si vous souhaitez insérer des messages dans la conversation.
+Le bouton « Send » (ou la touche Entrée lorsque vous êtes dans la zone de texte) lance la génération du prochain tour de la conversation.
+
+-   Si la zone de texte « Message » est vide, le LLM générera le prochain tour de la conversation, c’est-à-dire la réponse de l’autre personnage.
+-   Sinon, le texte saisi sera inséré dans la conversation, selon la valeur du menu déroulant « Character ».
+    Si ce menu correspond au personnage qui a parlé en dernier, le message sera simplement ajouté au dernier message de ce personnage.
+
+Le panneau de droite vous permet de contrôler la génération du LLM, en ajustant les paramètres de génération.
+C’est aussi le plus important pour personnaliser les personnages qui interagissent dans la conversation, en définissant leur nom et leur contexte.
+Reportez-vous aux panneaux correspondants pour plus d’informations sur leurs fonctionnalités.
+"""
+
+# panneau de contrôle de l'utilisateur
+[user_panel]
+role_selector_label = "Personnage"
+message_label = "Message"
+send_btn_label = "Envoyer"
+download_btn_label = "Télécharger"
+
+# panneau de définition des personnages
+[character_panel]
+title = "Définition des Personnages"
+description = """
+Définissez le nom et l’histoire de vos personnages.
+Assurez-vous d’inclure leurs motivations et objectifs pour donner lieu à des conversations captivantes.
+Veillez aussi à préciser dans quel contexte ils se rencontrent et pourquoi ils discutent ensemble.
+"""
+character_a_name_label = "Nom"
+character_a_story_label = "Contexte / Histoire"
+character_b_name_label = "Nom"
+character_b_story_label = "Contexte / Histoire"
+character_a_name = "Jean"
+character_a_story = "Un homme d'âge mûr, père de deux enfants et plutôt satisfait de sa vie. Il est un ami de Stella et vient la voir pour prendre un café."
+character_b_name = "Stella"
+character_b_story = "Une femme d'âge mûr, célibataire. Elle a invité son ami Jean à prendre un café pour solliciter son aide à propos d’un problème qui la préoccupe."
+
+[llm_panel]
+title = "Contrôle du LLM"
+description = """
+Ajustez les paramètres de génération de texte du LLM.
+N’hésitez pas à expérimenter ci-dessous ou à conserver les valeurs par défaut déjà optimisées.
+"""
+temperature_btn_label = "Température"
+temperature_btn_info = "La température détermine la créativité du LLM : plus elle est élevée, plus le style sera imaginatif."
+model_btn_label = "Modèle"
+model_btn_info = "Le modèle LLM utilisé pour la génération : un modèle plus grand est souvent plus performant, mais peut coûter plus cher."

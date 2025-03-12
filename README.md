@@ -1,72 +1,86 @@
 # Escribito
 
-This minimalistic app, built using [Gradio](https://gradio.app/), and allows you to put face to face two LLMs (Large
-Language Models) to create dialogues for your stories.
+**Open Source under the MIT License**
 
-## Getting Started
+Welcome to **Escribito**, a straightforward app that enables two Large Language Models (LLMs) to converse with one another in real time. This playful yet powerful tool is perfect for writers, creatives, and anyone eager to explore AI-generated dialogues, brainstorm story ideas, or simply spark inspiration.
 
-### Prerequisites
+## Why Escribito?
 
-In order for a successfull installation, you need the following:
+- **Creative Storytelling**: Craft engaging scenes by letting two AI “characters” exchange dialogue.
+- **Idea Generation**: Spur new narratives, gather fresh perspectives, or break writer’s block.
+- **Simplicity**: With a minimalistic approach powered by [Gradio](https://gradio.app/), Escribito aims to be both accessible and straightforward.
 
-- A working installation of [python](https://www.python.org/downloads/),
-- A Cohere API key.
-  You can obtain one by signing up on the [Cohere website](https://cohere.ai/).
-  Cohere offers free trial API keys with limited rates that you can use to test this app.
+## Features
 
-First clone this deposit on your system. You can do this by running the following command in your terminal:
+- **Dialogue Between LLMs**: Put two AI models face to face to co-create or debate.
+- **Cohere Integration**: Seamlessly connect with Cohere’s LLM via API key.
+- **User-Friendly Interface**: Launch a local web UI, no complicated setups.
+- **Extendable**: Plans to support more APIs and local LLMs in the future.
 
-```bash
-git clone https://github.com/Ahmed-AmineHomman/escribito
-```
+## Prerequisites
 
-You can also download the zip file from the GitHub page of this solution and extract it on your disk.
+- Basic familiarity with [Python](https://www.python.org/about/gettingstarted/). (If you need a refresh, follow the link.)
+- A valid [Cohere API key](https://dashboard.cohere.com/). (Free trials are available.)
 
-Then, open a terminal inside the root directory of this deposit and install the required libraries by running the
-following command:
+## Installation
 
-```bash
-pip install .
-```
+1.  **Clone or Download** the repository:
+    ```bash
+    git clone https://github.com/Ahmed-AmineHomman/escribito
+    ```
+2.  **Install Dependencies**:
+    ```bash
+    pip install .
+    ```
 
-### Usage
+That’s it! You’re ready to explore the app.
 
-To start the app, run the following command:
+## Usage
 
-```bash
-python app.py
-```
+1. **Set Up Your API Key**:
+   - Option A: Export it as an environment variable:
+     ```bash
+     export COHERE_API_KEY=your_api_key
+     ```
+   - Option B: Pass it when launching the app:
+     ```bash
+     python app.py --api-key your_api_key
+     ```
 
-Then, open your browser and go to `http://localhost:7860/` to start using the app.
+2. **Launch Escribito**:
+   ```bash
+   python app.py
+   ```
+   Then open your browser at `http://localhost:7860/` and start creating AI dialogues.
 
-The app takes additional parameter whose details you can find by running the following command:
+3. **Explore Other Settings**:
+   ```bash
+   python app.py --help
+   ```
+   This will list optional parameters to customize your experience.
 
-```bash
-python app.py --help
-```
+## How It Works
 
-The app is minimalistic and very simple. Please refer to the in-app documentation for more information.
+- **Under the Hood**: Escribito harnesses Cohere’s LLM to propose responses for each "character." You can name these characters, set the conversation context, and watch them build a dynamic dialogue.
+- **Creative Use Cases**: Character interviews, story ideation, role-playing scenarios, and more.
 
-### API Key
+## Roadmap
 
-This app only supports LLMs from Cohere. You need to provide your API key in order to use the app. You can do this by
-signing up on the [Cohere platform](https://dashboard.cohere.com/) and creating a free trial API key. Such keys come
-with rates limitations but are enough to test this app.
+- **Additional Providers**: Integration with other AI models (including local solutions) is in the pipeline.
+- **Enhanced UI**: Sleek design improvements and extra settings for controlling creativity.
 
-In order for the app to recognize your API key, you need to set it in the environment variable `COHERE_API_KEY`. You can
-do this by running the following command in your terminal:
+## Contributing
 
-```bash
-export COHERE_API_KEY=your_api_key
-```
+We welcome contributions! If you’d like to add features, fix bugs, or improve documentation:
 
-You can also directly provide the API key to the app by setting the ``api-key`` parameter when running the app. For
-example:
+1. **Fork** the repository.
+2. **Create a new branch** with a descriptive name.
+3. **Implement your changes** and submit a pull request.
 
-```bash
-python app.py --api-key your_api_key
-```
+## License
 
-**Note**: The API key is sensitive information. Do not share it with anyone.
+Escribito is released under the [MIT License](https://en.wikipedia.org/wiki/MIT_License). Feel free to use, modify, and distribute this project as you wish. We kindly ask that you credit this repository when sharing your version.
 
-**Note (2)**: Additional APIs, and even local LLMs are planned to be supported in the future.
+---
+
+Have fun experimenting with AI-generated dialogues, and feel free to share your creations! If you have any questions or issues, please open an [issue on GitHub](https://github.com/Ahmed-AmineHomman/escribito/issues) or reach out on LinkedIn. Happy writing!
