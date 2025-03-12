@@ -6,6 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "escribito"
 version = "0.1.0"
 description = "A lightweight Gradio app leveraging IA to help you create wonderful dialogues for your novels or theater scenes."
+requires-python = ">=3.12"
 authors = [
     { name = "Ahmed-Amine HOMMAN", email = "ahmed-amine.homman@outlook.fr" }
 ]
