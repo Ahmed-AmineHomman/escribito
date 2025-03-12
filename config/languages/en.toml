@@ -1,0 +1,26 @@
+# ----------------------------------------------------------------------------------------------------------------------
+# This is the in-app documentation configuration file for the English language.
+# It defines all the text displayed in the app in the corresponding variables.
+# To create a configuration file for another language, simply copy this file and set all its variables in the desired language.
+# You can then run the app with the `--language` parameter and give it the name of the configuration file you want to use.
+#
+# Example:
+#       `python app.py --language=fr`
+# The above command will tell the app to search for a `fr.toml` file in this folder and use its content to display the in-app text.
+# It does not find the file, it will revert back automatically to this file.
+# ----------------------------------------------------------------------------------------------------------------------
+
+# The title of the app
+description = """
+Welcome to Escribito!
+
+This app allows to generate dialogues between two characters controlled by a Large Language Model (LLM).
+You can define on the right panel the name & back story of each character, and then click on the "Next" button to generate a single turn of conversation.
+You can also click on the "Reset" button to start a new conversation from scratch.
+If you want to control a given turn of conversation, you can choose the character and its message below and click "Next".
+The app will then add your message to the conversation.
+"""
+
+# App button labels
+send_btn_label = "Send"
+reset_btn_label = "Reset Conversation"
