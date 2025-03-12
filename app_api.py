@@ -8,10 +8,16 @@ CHARACTERS = {
     "assistant": "Character B",
 }
 ROLES = {v: k for k, v in CHARACTERS.items()}
+MODELS = {
+    "light": "command-r7b-12-2024",
+    "medium": "command-r-08-2024",
+    "heavy": "command-r-plus-08-2024"
+}
 
 
 def generate(
         conversation: list[dict],
+        model: str,
         client: ClientV2,
         system_prompt: str,
         temperature: float = 0.8,
@@ -26,6 +32,8 @@ def generate(
     ----------
     conversation: list of dict
         A gradio `ChatBot` of type "messages" value: a list of dictionaries with keys "role" and "content".
+    model: str
+        Identifier of the LLM to use for the generation.
     client: cohere.ClientV2
         The Cohere API client.
     system_prompt: str
@@ -53,7 +61,7 @@ def generate(
 
     # call the API
     response = (
-        client.chat(model="command-r", messages=messages, temperature=temperature)
+        client.chat(model=model, messages=messages, temperature=temperature)
         .message
         .content[0]
         .text
@@ -62,7 +70,7 @@ def generate(
     return response
 
 
-def download(
+def download_conversation(
         conversation: list[dict],
         temp_dir: str,
         name_a: str,
@@ -93,7 +101,7 @@ def download(
     return filename
 
 
-def next(
+def next_message(
         conversation: list[dict],
         user_character: str,
         user_message: str,
@@ -101,6 +109,7 @@ def next(
         story_a: str,
         name_b: str,
         story_b: str,
+        model: str,
         temperature: float,
         client: ClientV2,
 ) -> tuple[list, str, str]:
@@ -128,6 +137,8 @@ def next(
         Name of character B.
     story_b : str
         Story of character B.
+    model: str
+        Identifier of the LLM to use for the generation.
     temperature: float
         Temperature of the LLM generating the next message.
     client: cohere.ClientV2
@@ -182,16 +193,19 @@ Take care in only replying as your character and to never break the fourth curta
         else:
             system_prompt = _template.format(name=name_b, story=story_b)
 
+        # generate the next turn
+        params = dict(
+            client=client,
+            system_prompt=system_prompt,
+            model=MODELS.get(model),
+            temperature=temperature,
+        )
         if not conversation:  # if conversation is empty -> generate the first turn from empty user message
-            response = generate(
-                client=client,
-                conversation=[{"role": "user", "content": " "}],
-                system_prompt=system_prompt
-            )
-            conversation = [{"role": ROLES.get(next_character), "content": response}]
+            temp = [{"role": "user", "content": " "}]
         else:  # if conversation exists -> provide it as-is
-            response = generate(client=client, conversation=conversation, system_prompt=system_prompt)
-            conversation.append({"role": ROLES.get(next_character), "content": response})
+            temp = conversation
+        response = generate(conversation=temp, **params)
+        conversation.append({"role": ROLES.get(next_character), "content": response})
 
     # switch the next role & reset user message
     user_character = "Character A" if next_character == "Character B" else "Character B"

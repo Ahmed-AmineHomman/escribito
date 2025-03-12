@@ -7,7 +7,7 @@ from os import getenv
 import gradio as gr
 from cohere import ClientV2
 
-from app_api import next, download, CHARACTERS
+from app_api import next_message, download_conversation, CHARACTERS, MODELS
 
 
 def load_parameters() -> Namespace:
@@ -121,6 +121,13 @@ def build_ui(
                 gr.Markdown(
                     f"## {config.get('llm_panel').get('title')}\n\n{config.get('llm_panel').get('description')}")
                 with gr.Column(scale=1, variant="panel"):
+                    model = gr.Dropdown(
+                        label=config.get("llm_panel").get("model_btn_label"),
+                        info=config.get("llm_panel").get("model_btn_info"),
+                        value=list(MODELS.keys())[0],
+                        choices=MODELS.keys(),
+                        multiselect=False,
+                    )
                     temperature = gr.Slider(
                         label=config.get("llm_panel").get("temperature_btn_label"),
                         info=config.get("llm_panel").get("temperature_btn_info"),
@@ -135,17 +142,17 @@ def build_ui(
 
         # When the button is clicked, call next_message and update both the conversation display and state.
         send_btn.click(
-            fn=partial(next, client=client),
-            inputs=[conversation, role_selector, text_input, name_a, story_a, name_b, story_b, temperature],
+            fn=partial(next_message, client=client),
+            inputs=[conversation, role_selector, text_input, name_a, story_a, name_b, story_b, model, temperature],
             outputs=[conversation, role_selector, text_input],
         )
         text_input.submit(
-            fn=partial(next, client=client),
-            inputs=[conversation, role_selector, text_input, name_a, story_a, name_b, story_b, temperature],
+            fn=partial(next_message, client=client),
+            inputs=[conversation, role_selector, text_input, name_a, story_a, name_b, story_b, model, temperature],
             outputs=[conversation, role_selector, text_input],
         )
         download_btn.click(
-            fn=download,
+            fn=download_conversation,
             inputs=[conversation, temp_dir, name_a, name_b],
             outputs=[download_btn]
         )
