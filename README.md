@@ -46,3 +46,27 @@ python app.py --help
 ```
 
 The app is minimalistic and very simple. Please refer to the in-app documentation for more information.
+
+### API Key
+
+This app only supports LLMs from Cohere. You need to provide your API key in order to use the app. You can do this by
+signing up on the [Cohere platform](https://dashboard.cohere.com/) and creating a free trial API key. Such keys come
+with rates limitations but are enough to test this app.
+
+In order for the app to recognize your API key, you need to set it in the environment variable `COHERE_API_KEY`. You can
+do this by running the following command in your terminal:
+
+```bash
+export COHERE_API_KEY=your_api_key
+```
+
+You can also directly provide the API key to the app by setting the ``api-key`` parameter when running the app. For
+example:
+
+```bash
+python app.py --api-key your_api_key
+```
+
+**Note**: The API key is sensitive information. Do not share it with anyone.
+
+**Note (2)**: Additional APIs, and even local LLMs are planned to be supported in the future.

@@ -44,6 +44,12 @@ def load_parameters() -> Namespace:
         default="temp",
         help="The temporary directory where the conversation will be stored.",
     )
+    parser.add_argument(
+        "--api-key",
+        type=str,
+        required=False,
+        help="The API key for the Cohere API. If unprovided, it will be obtained via the COHERE_API_KEY environment variable.",
+    )
     return parser.parse_args()
 
 
@@ -171,8 +177,9 @@ def build_ui(
 if __name__ == "__main__":
     params = load_parameters()
 
-    # load the API client
-    client = ClientV2(api_key=getenv("COHERE_API_KEY"))
+    # load the API client (use provided key if parameter is set, otherwise use the environment variable)
+    api_key = params.api_key if params.api_key else getenv("COHERE_API_KEY")
+    client = ClientV2(api_key=api_key)
 
     # load app language
     with open(os.path.join("config", "languages", f"{params.language}.toml"), "rb") as fp:
