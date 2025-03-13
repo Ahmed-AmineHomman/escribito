@@ -11,7 +11,7 @@ ROLES = {v: k for k, v in CHARACTERS.items()}
 MODELS = {
     "light": "command-r7b-12-2024",
     "medium": "command-r-08-2024",
-    "heavy": "command-r-plus-08-2024"
+    "heavy": "command-a-03-2025"
 }
 
 
@@ -159,6 +159,7 @@ You will assume that this other character is the user, and you will respond as y
 - Backstory: {story}.
 
 Take care in only replying as your character and to never break the fourth curtain.
+And remember, you response should be in the form of a dialogue, as if you were speaking to the user.
 """
 
     # Determine the last & next speaker
