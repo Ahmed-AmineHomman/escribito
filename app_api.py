@@ -15,6 +15,11 @@ MODELS = {
 }
 
 
+class ClientError(Exception):
+    """Custom exception for API client errors."""
+    pass
+
+
 def generate(
         conversation: list[dict],
         model: str,
@@ -23,28 +28,36 @@ def generate(
         temperature: float = 0.8,
 ) -> str:
     """
-    Generates the next turn of the provided conversation.
+    Generate the next message in a conversation using the Cohere API.
 
-    This method calls the API corresponding to the provided ``client`` to generate the turn's content.
-    If the provided conversation is empty or undefined, it will generate the first turn of the conversation.
+    Uses the provided system prompt and conversation history to generate a contextually appropriate response.
+
 
     Parameters
     ----------
-    conversation: list of dict
-        A gradio `ChatBot` of type "messages" value: a list of dictionaries with keys "role" and "content".
-    model: str
-        Identifier of the LLM to use for the generation.
-    client: cohere.ClientV2
-        The Cohere API client.
-    system_prompt: str
-        The system instructions given to the LLM generating the next message.
-    temperature: float
-        The temperature of the LLM generating the next message.
+    conversation : list[dict]
+        Chat history, where each dict contains:
+        - 'role': str, either 'user' or 'assistant'
+        - 'content': str, the message content
+    model : str
+        The identifier of the LLM model to use
+    client : ClientV2
+        Initialized Cohere API client instance
+    system_prompt : str
+        Instructions given to the LLM to guide the response generation
+    temperature : float, optional
+        Sampling temperature, controls response randomness.
+        Higher values increase creativity, defaults to 0.8
 
     Returns
     -------
     str
-        The response from the API.
+        The generated response text
+
+    Raises
+    ------
+    ClientError
+        If API call fails or model is invalid
     """
     # initialize messages with system prompt
     messages: list[dict[str, str]] = [{"role": "system", "content": system_prompt}]
@@ -60,45 +73,103 @@ def generate(
         messages += conversation
 
     # call the API
-    response = (
-        client.chat(model=model, messages=messages, temperature=temperature)
-        .message
-        .content[0]
-        .text
-    )
-
-    return response
+    try:
+        response = (
+            client.chat(model=model, messages=messages, temperature=temperature)
+            .message
+            .content[0]
+            .text
+        )
+        return response
+    except Exception as e:
+        raise ClientError(f"Failed to generate response: {e}") from e
 
 
 def download_conversation(
-        conversation: list[dict],
+        conversation: list[dict[str, str]],
         temp_dir: str,
         name_a: str,
         name_b: str,
 ) -> str:
     """
-    Allows the download of the conversation as a JSON file.
+    Exports the conversation history to a JSON file and returns the file path.
 
     Parameters
     ----------
-    conversation: list of dict
-        The conversation to download.
-    temp_dir: str
-        The server's temporary directory where the conversation will be stored.
-    name_a: str
-        Name of character A (i.e. "user" character).
-    name_b: str
-        Name of character B (i.e. "assistant" character).
+    conversation : list[dict[str, str]]
+        List of conversation turns, where each dict contains:
+        - 'role': str - either 'user' or 'assistant'
+        - 'content': str - the message content
+    temp_dir : str
+        Directory path where the output file will be saved
+    name_a : str
+        Display name for the user character (Character A)
+    name_b : str
+        Display name for the assistant character (Character B)
+
+    Returns
+    -------
+    str
+        Path to the generated JSON file
+
+    Raises
+    ------
+    IOError
+        If writing to the output file fails
     """
-    names = {k: v for k, v in zip(["user", "assistant"], [name_a, name_b])}
-    filename = os.path.join(temp_dir, "conversation.json")
-    data = [
-        {"character": names.get(data.get("role")), "message": data.get("content")}
-        for data in conversation
-    ]
-    with open(filename, "w") as f:
-        json.dump(data, f)
-    return filename
+    character_names = {"user": name_a, "assistant": name_b}
+    output_path = os.path.join(temp_dir, "conversation.json")
+
+    try:
+        formatted_data = [
+            {
+                "character": character_names[turn["role"]],
+                "message": turn["content"]
+            }
+            for turn in conversation
+        ]
+
+        with open(output_path, "w", encoding="utf-8") as f:
+            json.dump(formatted_data, f, ensure_ascii=False, indent=2)
+
+        return output_path
+
+    except (IOError, KeyError, TypeError) as e:
+        raise IOError(f"Failed to save conversation: {str(e)}") from e
+
+
+def _determine_next_speaker(
+        conversation: list[dict],
+        user_character: str | None = None
+) -> str:
+    """Determines who speaks next based on conversation history and user input."""
+    if user_character:
+        return user_character
+    if not conversation:
+        return "Character A"
+    last_character = CHARACTERS.get(conversation[-1].get("role"))
+    return "Character B" if last_character == "Character A" else "Character A"
+
+
+def _append_user_message(
+        conversation: list[dict],
+        user_message: str,
+        user_character: str
+) -> list[dict]:
+    """Handles adding a user message to the conversation."""
+    if not conversation:
+        return [{"role": ROLES.get(user_character), "content": user_message}]
+
+    last_turn = conversation[-1]
+    if user_character == CHARACTERS.get(last_turn.get("role")):
+        conversation[-1] = {
+            "role": last_turn.get("role"),
+            "content": f"{last_turn.get('content')} {user_message}"
+        }
+        return conversation
+
+    conversation.append({"role": ROLES.get(user_character), "content": user_message})
+    return conversation
 
 
 def next_message(
@@ -112,44 +183,48 @@ def next_message(
         model: str,
         temperature: float,
         client: ClientV2,
-) -> tuple[list, str, str]:
-    """
-    Generate the next message in the conversation.
+) -> tuple[list[dict], str, str]:
+    """Generate or append the next message in a character conversation.
+
+    The function either adds a user message to the conversation or generates
+    an AI response based on the current context and character roles.
 
     Parameters
     ----------
-    conversation : list of tuple
-        Conversation history.
-        It is a list of dictionaries with each element having two keys: "role" and "content".
-        It corresponds to the "messages" type `ChatBot` component.
-    user_character: str,
-        The character chosen by the user to speak next.
-        Only taken into account if ``user_message`` is not empty.
-    user_message: str
-        The message provided by the user.
-        If empty, the next message will be generated by the system.
-        Otherwise, the next message will correspond to this user message.
+    conversation : list[dict]
+        List of conversation turns, where each dict contains:
+        - 'role': str - either 'user' or 'assistant'
+        - 'content': str - the message content
+    user_character : str
+        Currently selected character ("Character A" or "Character B")
+    user_message : str
+        Message input by the user. If empty, generates AI response
     name_a : str
-        Name of character A.
+        Name of Character A
     story_a : str
-        Story of character A.
+        Backstory of Character A
     name_b : str
-        Name of character B.
+        Name of Character B
     story_b : str
-        Story of character B.
-    model: str
-        Identifier of the LLM to use for the generation.
-    temperature: float
-        Temperature of the LLM generating the next message.
-    client: cohere.ClientV2
-        The Cohere API client.
+        Backstory of Character B
+    model : str
+        LLM model identifier to use
+    temperature : float
+        LLM temperature parameter (0.0-2.0)
+    client : ClientV2
+        Initialized Cohere API client
 
     Returns
     -------
-    list
-        A ``list`` of ``dict`` containing all the turns of the conversation.
-        This object satisfies the "messages" values of the gradio ``Chatbot`` component.
-        Each element of the list has two keys: "role" and "content".
+    tuple[list[dict], str, str]
+        - Updated conversation history (list[dict])
+        - Next character to speak (str)
+        - Empty string (str) clearing user message
+
+    Raises
+    ------
+    ClientError
+        If API call fails during response generation
     """
     _template = """
 You will play the part of a given character, involved in a conversation with another character.
@@ -161,54 +236,29 @@ You will assume that this other character is the user, and you will respond as y
 Take care in only replying as your character and to never break the fourth curtain.
 And remember, you response should be in the form of a dialogue, as if you were speaking to the user.
 """
+    next_character = _determine_next_speaker(conversation, user_character if user_message else None)
 
-    # Determine the last & next speaker
-    if not conversation:  # if conversation is empty -> we assume that A speaks first
-        last_character = "Character A"
-    else:
-        last_character = CHARACTERS.get(conversation[-1].get("role"))
-
-    # If the user provided a message -> append user message to conversation
-    # If it did not -> generate a new turn in the conversation
     if user_message:
-        next_character = user_character
-
-        # If conversation is empty -> user message is the first message
-        # Otherwise, we append the user message to the conversation
-        if not conversation:
-            conversation = [{"role": ROLES.get(user_character), "content": user_message}]
-        else:
-            # if next & last role are identical -> append user message to last turn of conversation
-            # otherwise, append a new turn to the conversation
-            if user_character == last_character:
-                data = conversation[-1]
-                conversation[-1] = {"role": data.get("role"), "content": f"{data.get('content')} {user_message}"}
-            else:
-                conversation.append({"role": ROLES.get(user_character), "content": user_message})
+        conversation = _append_user_message(conversation, user_message, next_character)
     else:
-        next_character = "Character B" if last_character == "Character A" else "Character A"
+        # Generate AI response
+        system_prompt = _template.format(
+            name=name_a if next_character == "Character A" else name_b,
+            story=story_a if next_character == "Character A" else story_b
+        )
 
-        # set the system prompt
-        if next_character == "Character A":
-            system_prompt = _template.format(name=name_a, story=story_a)
-        else:
-            system_prompt = _template.format(name=name_b, story=story_b)
-
-        # generate the next turn
-        params = dict(
+        temp_convo = [{"role": "user", "content": " "}] if not conversation else conversation
+        response = generate(
+            conversation=temp_convo,
             client=client,
             system_prompt=system_prompt,
             model=MODELS.get(model),
             temperature=temperature,
         )
-        if not conversation:  # if conversation is empty -> generate the first turn from empty user message
-            temp = [{"role": "user", "content": " "}]
-        else:  # if conversation exists -> provide it as-is
-            temp = conversation
-        response = generate(conversation=temp, **params)
         conversation.append({"role": ROLES.get(next_character), "content": response})
 
-    # switch the next role & reset user message
-    user_character = "Character A" if next_character == "Character B" else "Character B"
-    user_message = ""
-    return conversation, user_character, user_message
+    return (
+        conversation,
+        "Character A" if next_character == "Character B" else "Character B",
+        ""
+    )
