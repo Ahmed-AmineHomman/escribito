@@ -12,51 +12,40 @@ from app_api import next_message, download_conversation, CHARACTERS, MODELS
 
 
 def load_parameters() -> Namespace:
-    parser = ArgumentParser()
+    parser = ArgumentParser(description="Escribito - A character-based dialogue generation application")
     parser.add_argument(
         "--language",
         type=str,
-        required=False,
         default="en",
-        help="The language of the application.",
-    )
-    parser.add_argument(
-        "--api_key",
-        type=str,
-        required=False,
-        help="The API key for the Cohere API. If unprovided, it will be obtained via the COHERE_API_KEY environment variable.",
-    )
-    parser.add_argument(
-        "--share",
-        action="store_true",
-        help="Whether to share the application.",
-    )
-    parser.add_argument(
-        "--port",
-        type=int,
-        required=False,
-        default=7860,
-        help="The port where the app will listen to (only used if --share is provided).",
-    )
-    parser.add_argument(
-        "--server-name",
-        type=str,
-        required=False,
-        default="localhost",
-        help="The server name where the app will listen to (only used if --share is provided).",
-    )
-    parser.add_argument(
-        "--temp-dir",
-        type=str,
-        required=False,
-        default="temp",
-        help="The temporary directory where the conversation will be stored.",
+        help="Interface language code (e.g., 'en' for English). Defaults to 'en'."
     )
     parser.add_argument(
         "--api-key",
         type=str,
-        required=False,
-        help="The API key for the Cohere API. If unprovided, it will be obtained via the COHERE_API_KEY environment variable.",
+        help="Cohere API key. If not provided, reads from COHERE_API_KEY environment variable.",
+    )
+    parser.add_argument(
+        "--share",
+        action="store_true",
+        help="Enable public URL sharing for remote access.",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=7860,
+        help="Local port number for the web interface. Defaults to 7860.",
+    )
+    parser.add_argument(
+        "--server-name",
+        type=str,
+        default="localhost",
+        help="Server hostname to bind to. Defaults to 'localhost'.",
+    )
+    parser.add_argument(
+        "--temp-dir",
+        type=str,
+        default="temp",
+        help="Directory path for storing conversation exports. Defaults to 'temp'.",
     )
     return parser.parse_args()
 
