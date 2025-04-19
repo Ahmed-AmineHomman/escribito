@@ -28,6 +28,7 @@ download_btn_label = "Download"
 
 # character definition panel
 [character_panel]
+header = "Characters"
 title = "Character Definition"
 description = """
 Define each character’s name and story. Include motivations, objectives, and relevant context to keep conversations engaging and coherent. Provide enough background on why your characters are interacting.
@@ -41,8 +42,10 @@ character_a_story = "A middle-aged father of two, happily enjoying life. He’s 
 character_b_name = "Stella"
 character_b_story = "A middle-aged woman, single, who invited her friend John for coffee to seek his advice on a pressing concern."
 
+# LLM control panel
 [llm_panel]
-title = "LLM Control"
+header = "AI"
+title = "AI Control"
 description = """
 Adjust the parameters that guide your AI’s responses. Experiment with different settings or rely on the recommended defaults.
 """

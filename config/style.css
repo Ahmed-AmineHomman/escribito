@@ -1,0 +1,26 @@
+/* Title styling */
+.title {
+    font-size: 36px; /* Adjust the size for the title */
+    font-weight: bold;
+    color: #333333; /* Dark gray color */
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Header styling */
+.header {
+    font-size: 24px; /* Adjust the size for headers */
+    font-weight: bold;
+    color: #555555; /* Medium gray color */
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+/* Text body styling */
+.text-body {
+    font-size: 20px; /* Adjust the size for body text */
+    line-height: 1.6; /* Improves readability */
+    color: #666666; /* Light gray color */
+    margin-bottom: 15px;
+    text-align: justify;
+}

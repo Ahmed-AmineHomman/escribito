@@ -221,7 +221,7 @@ If the first message is "<skip>", ignore it and start the conversation.
 
     # No user message provided, so generate the next message.
     if not conversation:  # Default to assistant if no conversation exists and skip first user message.
-        last_role = "assistant"
+        last_role = "assistant" if user_character == name_a else "user"
         conversation = [{"role": "user", "content": "<skip>"}]
     else:
         last_role = conversation[-1].get("role")

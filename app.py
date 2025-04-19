@@ -69,8 +69,8 @@ def build_ui(
     """
     Builds the UI.
     """
-    with gr.Blocks() as demo:
-        gr.Markdown(f"# Escribito", elem_classes=["header"])
+    with gr.Blocks(css="config/style.css") as demo:
+        gr.Markdown(f"# Escribito", elem_classes=["title"])
         with gr.Row(equal_height=True):
             with gr.Column(scale=1):
                 gr.Image(
@@ -86,54 +86,64 @@ def build_ui(
                     scale=1,
                 )
             with gr.Column(scale=3):
-                gr.Markdown(config.get('description', ''))
+                gr.Markdown(config.get('description', ''), elem_classes=["text-body"])
 
         # Control Panels
-        with gr.Tab(label="Character A"):  # Character A control panel
-            gr.Markdown(
-                f"## {config.get('character_panel').get('title')}\n\n{config.get('character_panel').get('description')}"
-            )
-            name_a = gr.Text(
-                label=config.get("character_panel").get("character_a_name_label"),
-                value=config.get("character_panel").get("character_a_name")
-            )
-            story_a = gr.Textbox(
-                label=config.get("character_panel").get("character_a_story_label"),
-                value=config.get("character_panel").get("character_a_story"),
-                lines=3,
-            )
-        with gr.Tab(label="Character B"):  # Character B control panel
-            gr.Markdown(
-                f"## {config.get('character_panel').get('title')}\n\n{config.get('character_panel').get('description')}"
-            )
-            name_b = gr.Text(
-                label=config.get("character_panel").get("character_b_name_label"),
-                value=config.get("character_panel").get("character_b_name")
-            )
-            story_b = gr.Text(
-                label=config.get("character_panel").get("character_b_story_label"),
-                value=config.get("character_panel").get("character_b_story"),
-                lines=3,
-            )
-        with gr.Tab(label="Model"):  # LLM Control Panel
-            gr.Markdown(
-                f"## {config.get('llm_panel').get('title')}\n\n{config.get('llm_panel').get('description')}")
-            with gr.Row():
-                model = gr.Dropdown(
-                    label=config.get("llm_panel").get("model_btn_label"),
-                    info=config.get("llm_panel").get("model_btn_info"),
-                    value=list(MODELS.keys())[0],
-                    choices=MODELS.keys(),
-                    multiselect=False,
+        with gr.Row(equal_height=False):
+            with gr.Accordion(label=config.get('character_panel').get("header"), open=False):
+                gr.Markdown(
+                    value=f"## {config.get('character_panel').get('title')}",
+                    elem_classes=["header"]
                 )
-                temperature = gr.Slider(
-                    label=config.get("llm_panel").get("temperature_btn_label"),
-                    info=config.get("llm_panel").get("temperature_btn_info"),
-                    value=0.8,
-                    minimum=0.0,
-                    maximum=2.0,
-                    step=0.05,
+                gr.Markdown(
+                    value=f"{config.get('character_panel').get('description')}",
+                    elem_classes=["text-body"]
                 )
+                with gr.Tab(label="Character A"):  # Character A control panel
+                    name_a = gr.Text(
+                        label=config.get("character_panel").get("character_a_name_label"),
+                        value=config.get("character_panel").get("character_a_name")
+                    )
+                    story_a = gr.Textbox(
+                        label=config.get("character_panel").get("character_a_story_label"),
+                        value=config.get("character_panel").get("character_a_story"),
+                        lines=3,
+                    )
+                with gr.Tab(label="Character B"):  # Character B control panel
+                    name_b = gr.Text(
+                        label=config.get("character_panel").get("character_b_name_label"),
+                        value=config.get("character_panel").get("character_b_name")
+                    )
+                    story_b = gr.Text(
+                        label=config.get("character_panel").get("character_b_story_label"),
+                        value=config.get("character_panel").get("character_b_story"),
+                        lines=3,
+                    )
+            with gr.Accordion(label=config.get("llm_panel").get("header"), open=False):  # LLM Control Panel
+                gr.Markdown(
+                    value=f"## {config.get('llm_panel').get('title')}",
+                    elem_classes=["header"]
+                )
+                gr.Markdown(
+                    value=f"{config.get('llm_panel').get('description')}",
+                    elem_classes=["text-body"]
+                )
+                with gr.Row():
+                    model = gr.Dropdown(
+                        label=config.get("llm_panel").get("model_btn_label"),
+                        info=config.get("llm_panel").get("model_btn_info"),
+                        value=list(MODELS.keys())[0],
+                        choices=MODELS.keys(),
+                        multiselect=False,
+                    )
+                    temperature = gr.Slider(
+                        label=config.get("llm_panel").get("temperature_btn_label"),
+                        info=config.get("llm_panel").get("temperature_btn_info"),
+                        value=0.8,
+                        minimum=0.0,
+                        maximum=2.0,
+                        step=0.05,
+                    )
 
         # Story Display
         conversation = gr.Chatbot(
