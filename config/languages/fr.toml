@@ -36,6 +36,7 @@ download_btn_label = "Télécharger"
 
 # panneau de définition des personnages
 [character_panel]
+header = "Personnages"
 title = "Définition des Personnages"
 description = """
 Définissez le nom et l’histoire de vos personnages.
@@ -52,6 +53,7 @@ character_b_name = "Stella"
 character_b_story = "Une femme d'âge mûr, célibataire. Elle a invité son ami Jean à prendre un café pour solliciter son aide à propos d’un problème qui la préoccupe."
 
 [llm_panel]
+header = "IA"
 title = "Contrôle du LLM"
 description = """
 Ajustez les paramètres de génération de texte du LLM.

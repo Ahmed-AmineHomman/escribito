@@ -3,11 +3,7 @@ import os
 
 from cohere import ClientV2
 
-CHARACTERS = {
-    "user": "Character A",
-    "assistant": "Character B",
-}
-ROLES = {v: k for k, v in CHARACTERS.items()}
+# Constants
 MODELS = {
     "light": "command-r7b-12-2024",
     "medium": "command-r-08-2024",
@@ -59,23 +55,20 @@ def generate(
     ClientError
         If API call fails or model is invalid
     """
-    # initialize messages with system prompt
-    messages: list[dict[str, str]] = [{"role": "system", "content": system_prompt}]
+    # consistency checks.
+    if (not conversation) or (len(conversation) == 0):
+        raise ClientError("Conversation history is empty.")
 
-    # append the conversation turns to the messages
-    last_role = conversation[-1].get("role")
-    if last_role == "assistant":  # if conversation ends with "assistant" -> revert the roles
-        messages += [
-            {"role": "user" if data.get("role") == "assistant" else "assistant", "content": data.get("content")}
-            for data in conversation
-        ]
-    else:
+    # append system prompt to conversation
+    messages: list[dict[str, str]] = [{"role": "system", "content": system_prompt}]
+    if conversation:
         messages += conversation
 
     # call the API
     try:
         response = (
-            client.chat(model=model, messages=messages, temperature=temperature)
+            client
+            .chat(model=model, messages=messages, temperature=temperature)
             .message
             .content[0]
             .text
@@ -138,40 +131,6 @@ def download_conversation(
         raise IOError(f"Failed to save conversation: {str(e)}") from e
 
 
-def _determine_next_speaker(
-        conversation: list[dict],
-        user_character: str | None = None
-) -> str:
-    """Determines who speaks next based on conversation history and user input."""
-    if user_character:
-        return user_character
-    if not conversation:
-        return "Character A"
-    last_character = CHARACTERS.get(conversation[-1].get("role"))
-    return "Character B" if last_character == "Character A" else "Character A"
-
-
-def _append_user_message(
-        conversation: list[dict],
-        user_message: str,
-        user_character: str
-) -> list[dict]:
-    """Handles adding a user message to the conversation."""
-    if not conversation:
-        return [{"role": ROLES.get(user_character), "content": user_message}]
-
-    last_turn = conversation[-1]
-    if user_character == CHARACTERS.get(last_turn.get("role")):
-        conversation[-1] = {
-            "role": last_turn.get("role"),
-            "content": f"{last_turn.get('content')} {user_message}"
-        }
-        return conversation
-
-    conversation.append({"role": ROLES.get(user_character), "content": user_message})
-    return conversation
-
-
 def next_message(
         conversation: list[dict],
         user_character: str,
@@ -184,10 +143,23 @@ def next_message(
         temperature: float,
         client: ClientV2,
 ) -> tuple[list[dict], str, str]:
-    """Generate or append the next message in a character conversation.
+    """
+    Generate or append the next message in a character conversation.
 
-    The function either adds a user message to the conversation or generates
-    an AI response based on the current context and character roles.
+    The next message can either be associated with character A or B, depending on the last character to speak:
+    - If character A spoke last, character B will respond.
+    - If character B spoke last, character A will respond.
+    Since a Chatbot element is used to display the conversation, each character must be assigned to one of the two roles supported by this element: user or assistant.
+    Character A is always assigned to the user role, while character B is always assigned to the assistant role.
+
+    Since most Generative APIs assume that the last message of the conversation should be the user message, roles are reverted whenever character A (user) should speak (i.e. character B spoke last).
+    This reversion is done in the ``generate`` function, called whenever an AI response must be generated.
+
+    Finally, the user can set the next message if it wants to.
+    This is done by setting the ``user_message`` parameter, which is None by default.
+    If this parameter is provided, no AI response is generated, and the user message is appended to the conversation.
+
+    This method returns the updated conversation, the next character to speak, and an empty string to clear the user message input.
 
     Parameters
     ----------
@@ -227,38 +199,54 @@ def next_message(
         If API call fails during response generation
     """
     _template = """
-You will play the part of a given character, involved in a conversation with another character.
-You will assume that this other character is the user, and you will respond as your character, which is described below.
+You are a character in a conversation with another character.
+Stay in character and respond naturally, as if in a theater play.
+Return in natural language, as if you were talking to a friend.
+Do not add extra information.
 
-- Name: {name},
-- Backstory: {story}.
+- Name: {name}
+- Backstory: {story}
 
-Take care in only replying as your character and to never break the fourth curtain.
-And remember, you response should be in the form of a dialogue, as if you were speaking to the user.
-"""
-    next_character = _determine_next_speaker(conversation, user_character if user_message else None)
+If the first message is "<skip>", ignore it and start the conversation.
+"""[1:-1]
 
-    if user_message:
-        conversation = _append_user_message(conversation, user_message, next_character)
+    # If a user message is provided, append it without generating an AI response.
+    if user_message.strip():
+        # Determine message role based on the selected character.
+        current_role = "user" if user_character == name_a else "assistant"
+        conversation.append({"role": current_role, "content": user_message})
+        # Toggle next speaker.
+        next_character = name_b if current_role == "user" else name_a
+        return conversation, next_character, ""
+
+    # No user message provided, so generate the next message.
+    if not conversation:  # Default to assistant if no conversation exists and skip first user message.
+        last_role = "assistant" if user_character == name_a else "user"
+        conversation = [{"role": "user", "content": "<skip>"}]
     else:
-        # Generate AI response
-        system_prompt = _template.format(
-            name=name_a if next_character == "Character A" else name_b,
-            story=story_a if next_character == "Character A" else story_b
-        )
+        last_role = conversation[-1].get("role")
 
-        temp_convo = [{"role": "user", "content": " "}] if not conversation else conversation
-        response = generate(
-            conversation=temp_convo,
+    # If the last message was from the assistant, revert roles when generating.
+    if last_role == "assistant":
+        generated_role = "user"
+        system_prompt = _template.format(name=name_a, story=story_a)
+        next_character = name_b
+    else:
+        generated_role = "assistant"
+        system_prompt = _template.format(name=name_b, story=story_b)
+        next_character = name_a
+
+    # Call the API to generate the response.
+    try:
+        response_text = generate(
+            conversation=conversation,
+            model=MODELS.get(model),
             client=client,
             system_prompt=system_prompt,
-            model=MODELS.get(model),
             temperature=temperature,
         )
-        conversation.append({"role": ROLES.get(next_character), "content": response})
+    except Exception as e:
+        raise e
 
-    return (
-        conversation,
-        "Character A" if next_character == "Character B" else "Character B",
-        ""
-    )
+    conversation.append({"role": generated_role, "content": response_text})
+    return conversation, next_character, ""
